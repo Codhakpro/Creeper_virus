@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>System Security Scan</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#000; color:#0f0; font-family:"Courier New",monospace;
+         overflow:hidden; user-select:none; -webkit-user-select:none;
+         touch-action:none; height:100vh; }
+  #screen { position:fixed; inset:0; padding:18px; font-size:15px;
+            white-space:pre-wrap; z-index:5; }
+  .popup { position:fixed; width:250px; padding:16px; border-radius:10px;
+           text-align:center; font-family:sans-serif; font-size:15px; color:#111;
+           box-shadow:0 4px 25px rgba(255,0,0,.6); animation:shake .25s infinite; z-index:6; }
+  @keyframes shake {
+    0%,100% { transform:translate(0,0) rotate(0deg); }
+    25% { transform:translate(2px,-2px) rotate(-1.5deg); }
+    75% { transform:translate(-2px,2px) rotate(1.5deg); }
+  }
+  #reveal { display:none; position:fixed; inset:0; background:#111;
+            color:#fff; text-align:center; z-index:99; padding-top:28vh;
+            overflow-y:auto; }
+  #reveal h1 { font-size:2.4em; margin-bottom:12px; }
+  #reveal p { font-size:1.1em; color:#aaa; margin-top:8px; }
+  #exitBtn { margin-top:25px; padding:14px 30px; font-size:16px;
+             border-radius:10px; border:2px solid #fff; background:transparent;
+             color:#fff; cursor:pointer; }
+  .blink { animation: blink .8s steps(1) infinite; display:inline-block; }
+  @keyframes blink { 50% { opacity:0; } }
+</style>
+</head>
+<body>
+
+<div id="screen"><span class="cursor">_</span></div>
+
+<div id="reveal">
+  <h1>🎃 YOU GOT CREEPER'D 🎃</h1>
+  <p>I'M THE CREEPER... catch me if you can 😂</p>
+  <p><i>(Nothing was touched. Your phone is fine. You just got pranked.)</i></p>
+  <button id="exitBtn" onclick="endPrank(true)">Tap here to close</button>
+</div>
+
+<script>
+// ================= MASTER CONTROL =================
+// Every timer/interval goes in this list so we can nuke them all later
+const allTimers = [];
+function every(ms, fn)   { const t = setInterval(fn, ms);  allTimers.push(t); return t; }
+function after(ms, fn)   { const t = setTimeout(fn, ms);   allTimers.push(t); return t; }
+
+let prankOver = false;
+
+function endPrank(manual) {
+  if (prankOver) return;
+  prankOver = true;
+
+  // KILL EVERYTHING
+  allTimers.forEach(t => { clearTimeout(t); clearInterval(t); });
+  document.querySelectorAll(".popup").forEach(p => p.remove());
+  window.onbeforeunload = null;
+  window.onpopstate = null;
+
+  const reveal = document.getElementById("reveal");
+  reveal.style.display = "block";
+  reveal.style.position = "fixed";
+
+  // Try to leave fullscreen
+  if (document.fullscreenElement) {
+    document.exitFullscreen().catch(()=>{});
+  }
+
+  if (!manual && navigator.vibrate) navigator.vibrate([300,100,300]);
+}
+
+// ================= ESCAPE LOCKS =================
+history.pushState(null, "", location.href);
+window.onpopstate = () => { history.pushState(null, "", location.href); };
+window.onbeforeunload = () => "System scan in progress!";
+document.addEventListener("contextmenu", e => e.preventDefault());
+
+function goFullscreen() {
+  if (prankOver) return;
+  const el = document.documentElement;
+  if (el.requestFullscreen) el.requestFullscreen().catch(()=>{});
+}
+if (!prankOver) {
+  document.body.addEventListener("click", goFullscreen);
+}
+
+// ================= THE SCRIPT =================
+const term = document.getElementById("screen");
+
+const script = [
+  [0,     "> Initializing system security scan...\n"],
+  [1200,  "> Device detected: UNKNOWN TARGET\n"],
+  [2000,  "> Scanning contacts... ████████░░ 80%\n"],
+  [2800,  "> Scanning gallery... ██████████ 100%\n"],
+  [3600,  "> ⚠️  UNAUTHORIZED ACCESS DETECTED\n"],
+  [4200,  "> Bypassing firewall... OK\n"],
+  [5000,  "> Extracting browser history... OK\n"],
+  [5600,  "> Uploading data to remote server...\n"],
+  [6500,  "> 3.7 GB transferred\n"],
+  [7200,  "> I'M THE CREEPER :)\n"],
+  [8000,  "> CATCH ME IF YOU CAN!\n"],
+  [8700,  "> Installing persistent backdoor...\n"],
+  [9500,  "> Locking device in 5...\n"],
+  [10200, "> 4...\n"],
+  [10800, "> 3...\n"],
+  [11400, "> 2...\n"],
+  [12000, "> 1...\n"],
+  [12800, "> ACCESS GRANTED ✅\n"],
+  [14000, "> ...just kidding 😄\n"],
+];
+
+script.forEach(([t, text]) => after(t, () => {
+  if (prankOver) return;
+  term.textContent += text;
+}));
+
+// Fake progress bar
+const bar = document.createElement("div");
+bar.style.cssText = "position:fixed;bottom:20px;left:10%;width:80%;height:14px;border:2px solid #0f0;z-index:7;";
+const fill = document.createElement("div");
+fill.style.cssText = "height:100%;width:0%;background:#0f0;transition:width .3s;";
+bar.appendChild(fill);
+document.body.appendChild(bar);
+
+let p = 0;
+every(600, () => {
+  p = Math.min(100, p + Math.random() * 9);
+  fill.style.width = p + "%";
+});
+
+// Shaking popups
+const MSGS = ["⚠️ SYSTEM BREACH!", "I'M THE CREEPER :)", "CATCH ME IF YOU CAN!",
+              "DATA LEAK IN PROGRESS 🆘", "0xDEADBEEF"];
+const COLORS = ["#ff5555","#ffcc00","#66ff66","#ff99ff"];
+
+every(700, () => {
+  if (prankOver) return;
+  const d = document.createElement("div");
+  d.className = "popup";
+  d.style.background = COLORS[Math.floor(Math.random()*COLORS.length)];
+  d.textContent = MSGS[Math.floor(Math.random()*MSGS.length)];
+  d.style.left = Math.random()*(window.innerWidth-260)+"px";
+  d.style.top  = Math.random()*(window.innerHeight-100)+"px";
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 1400);
+});
+
+// Screen flicker
+every(400, () => {
+  if (prankOver) return;
+  document.body.style.background = Math.random() < .35 ? "#300" : "#000";
+});
+
+// Vibration bursts (Android)
+if (navigator.vibrate) {
+  after(4200, () => !prankOver && navigator.vibrate([400,150,400]));
+  after(9000, () => !prankOver && navigator.vibrate([200,100,200,100,600]));
+}
+
+// Blinking cursor
+every(500, () => {
+  if (prankOver) return;
+  if (!term.textContent.endsWith("_")) term.textContent += "_";
+  else term.textContent = term.textContent.slice(0,-1);
+});
+
+// ============ THE END — guaranteed ============
+after(15200, () => endPrank(false));   // hard stop at ~15s no matter what
+after(16000, () => endPrank(false));   // backup failsafe
+
+// Emergency exit: tapping the screen 8 times quickly also ends it
+let taps = 0, tapTimer;
+document.body.addEventListener("touchstart", () => {
+  taps++;
+  clearTimeout(tapTimer);
+  tapTimer = setTimeout(() => taps = 0, 1500);
+  if (taps >= 8) endPrank(false);
+});
+</script>
+
+</body>
+</html>
